@@ -46,6 +46,7 @@ public abstract class MvpLinearLayout<V extends MvpView, P extends MvpPresenter<
     super(context, attrs);
   }
 
+  @TargetApi(11)
   public MvpLinearLayout(Context context, AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
   }
