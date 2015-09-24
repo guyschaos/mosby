@@ -16,6 +16,8 @@
 
 package com.hannesdorfmann.mosby.mvp;
 
+import android.annotation.TargetApi;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -33,6 +35,7 @@ import com.hannesdorfmann.mosby.mvp.delegate.ActivityMvpDelegateImpl;
 public abstract class MvpActivity<V extends MvpView, P extends MvpPresenter<V>>
     extends AppCompatActivity implements ActivityMvpDelegateCallback<V, P>, MvpView {
 
+  private boolean isConfigChanged;
   protected ActivityMvpDelegate mvpDelegate;
   protected P presenter;
   protected boolean retainInstance;
@@ -50,6 +53,7 @@ public abstract class MvpActivity<V extends MvpView, P extends MvpPresenter<V>>
   @Override protected void onSaveInstanceState(Bundle outState) {
     super.onSaveInstanceState(outState);
     getMvpDelegate().onSaveInstanceState(outState);
+    isConfigChanged = true;
   }
 
   @Override protected void onPause() {
@@ -132,8 +136,14 @@ public abstract class MvpActivity<V extends MvpView, P extends MvpPresenter<V>>
     return retainInstance;
   }
 
+  @TargetApi(11)
   @Override public boolean shouldInstanceBeRetained() {
-    return retainInstance && isChangingConfigurations();
+    if (Build.VERSION.SDK_INT>Build.VERSION_CODES.GINGERBREAD_MR1){
+      return retainInstance && isChangingConfigurations();
+    }
+    else{
+      return retainInstance && isConfigChanged;
+    }
   }
 
   @Override public void setRetainInstance(boolean retainInstance) {

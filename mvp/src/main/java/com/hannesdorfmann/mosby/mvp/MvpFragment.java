@@ -16,7 +16,9 @@
 
 package com.hannesdorfmann.mosby.mvp;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -36,7 +38,7 @@ import com.hannesdorfmann.mosby.mvp.delegate.BaseMvpDelegateCallback;
  */
 public abstract class MvpFragment<V extends MvpView, P extends MvpPresenter<V>> extends Fragment
     implements BaseMvpDelegateCallback<V, P>, MvpView {
-
+  private boolean isConfigChanged;
   protected FragmentMvpDelegate<V, P> mvpDelegate;
 
   /**
@@ -86,9 +88,16 @@ public abstract class MvpFragment<V extends MvpView, P extends MvpPresenter<V>> 
     return getRetainInstance();
   }
 
+  @TargetApi(11)
   @Override public boolean shouldInstanceBeRetained() {
     FragmentActivity activity = getActivity();
-    boolean changingConfig = activity != null && activity.isChangingConfigurations();
+    boolean flag = false;
+    if (Build.VERSION.SDK_INT>Build.VERSION_CODES.GINGERBREAD_MR1){
+      flag = activity.isChangingConfigurations();
+    }else{
+      flag = isConfigChanged;
+    }
+    boolean changingConfig = activity != null && flag;
     return getRetainInstance() && changingConfig;
   }
 
@@ -154,6 +163,7 @@ public abstract class MvpFragment<V extends MvpView, P extends MvpPresenter<V>> 
   @Override public void onSaveInstanceState(Bundle outState) {
     super.onSaveInstanceState(outState);
     getMvpDelegate().onSaveInstanceState(outState);
+    isConfigChanged = true;
   }
 }
 
